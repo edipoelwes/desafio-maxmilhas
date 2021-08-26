@@ -30,14 +30,13 @@ class CpfController extends Controller
         $cpf = new Cpf();
 
         $cpf->cpf = $request->cpf;
+        $cpf->validate($cpf->cpf);
 
-        $cpf_exists = Cpf::select('cpf')->where('cpf', $cpf->clearField($request->cpf))->get();
+        $cpf_exists = Cpf::select('cpf')->where('cpf', $cpf->clearField($cpf->cpf))->get();
 
         if($cpf_exists) {
             return response()->json('ExistsCpfException');
         }
-
-        // dd($cpf_exists);
 
         $cpf->save();
 
