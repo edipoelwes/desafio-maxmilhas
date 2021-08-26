@@ -18,3 +18,4 @@ use Illuminate\Support\Facades\Route;
 Route::get('/cpf', [CpfController::class, 'index']);
 Route::post('/cpf', [CpfController::class, 'store']);
 Route::get('/cpf/{cpf}', [CpfController::class, 'show']);
+Route::delete('/cpf/{cpf}', [CpfController::class, 'destroy']);

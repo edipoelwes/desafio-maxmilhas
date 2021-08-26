@@ -15,7 +15,7 @@ class CpfController extends Controller
      */
     public function index()
     {
-        $cpfs = Cpf::select('cpf')->get();
+        $cpfs = Cpf::select(['cpf', 'created_at'])->get();
         return response()->json($cpfs);
     }
 
@@ -88,7 +88,7 @@ class CpfController extends Controller
                 'message' => "CPF not found."
             ];
 
-            return response()->json($content);
+            return response()->json($content, 404);
         }
 
         $content = [
@@ -100,26 +100,41 @@ class CpfController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($cpf)
     {
-        //
+        $document = new Cpf();
+
+        //verifíca se o cpf é válido
+        if(!$document->validate($this->document_clear($cpf))) {
+            $content = [
+                'type' => "InvalidCpfException",
+                'message' => "CPF is not valid."
+            ];
+
+            return response()->json($content);
+
+        }
+
+        $cpf = Cpf::where('cpf', $this->document_clear($cpf))->first();
+
+        //verifíca se existe um cpf
+        if(!$cpf) {
+            $content = [
+                'type' => "NotFoundCpfException",
+                'message' => "CPF not found."
+            ];
+
+            return response()->json($content, 404);
+        }
+
+        $cpf->delete();
+
+        return response()->json([], 200);
     }
 
     private function document_clear($cpf)
