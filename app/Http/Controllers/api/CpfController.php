@@ -15,7 +15,7 @@ class CpfController extends Controller
      */
     public function index()
     {
-        $cpfs = Cpf::paginate(10);
+        $cpfs = Cpf::select('cpf')->get();
         return response()->json($cpfs);
     }
 
@@ -28,19 +28,34 @@ class CpfController extends Controller
     public function store(Request $request)
     {
         $cpf = new Cpf();
-
         $cpf->cpf = $request->cpf;
-        $cpf->validate($cpf->cpf);
 
-        $cpf_exists = Cpf::select('cpf')->where('cpf', $cpf->clearField($cpf->cpf))->get();
+        //verifíca se o cpf é válido
+        if(!$cpf->validate($cpf->cpf)) {
+            $content = [
+                'type' => "InvalidCpfException",
+                'message' => "CPF is not valid."
+            ];
 
-        if($cpf_exists) {
-            return response()->json('ExistsCpfException');
+            return response()->json($content);
+
+        }
+
+        $cpf_exists = Cpf::where('cpf', $cpf->cpf)->get();
+
+        if(count($cpf_exists) > 0) {
+            $content = [
+                'type' => "ExistsCpfException",
+                'message' => "CPF exists."
+            ];
+
+            return response()->json($content);
         }
 
         $cpf->save();
 
-        return response()->json($cpf, 200);
+        $content = ["cpf" => $cpf->cpf, "created_at" => $cpf->created_at];
+        return response()->json($content, 201);
     }
 
     /**
@@ -49,9 +64,39 @@ class CpfController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($cpf)
     {
-        //
+        $document = new Cpf();
+
+        //verifíca se o cpf é válido
+        if(!$document->validate($this->document_clear($cpf))) {
+            $content = [
+                'type' => "InvalidCpfException",
+                'message' => "CPF is not valid."
+            ];
+
+            return response()->json($content);
+
+        }
+
+        $cpf_exists = Cpf::where('cpf', $this->document_clear($cpf))->first();
+
+        //verifíca se existe um cpf
+        if(!$cpf_exists) {
+            $content = [
+                'type' => "NotFoundCpfException",
+                'message' => "CPF not found."
+            ];
+
+            return response()->json($content);
+        }
+
+        $content = [
+            'cpf' => $cpf_exists['cpf'],
+            'created_at' => $cpf_exists['created_at']
+        ];
+
+        return response()->json($content);
     }
 
     /**
@@ -75,5 +120,10 @@ class CpfController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    private function document_clear($cpf)
+    {
+        return preg_replace('/[^0-9]/is', '', $cpf);
     }
 }
