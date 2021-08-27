@@ -15,7 +15,7 @@ class CpfController extends Controller
      */
     public function index()
     {
-        $cpfs = Cpf::select(['cpf', 'created_at'])->get();
+        $cpfs = Cpf::select(['cpf', 'created_at'])->paginate();
         return response()->json($cpfs);
     }
 
