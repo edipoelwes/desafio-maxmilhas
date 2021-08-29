@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
     tty: true
     ports:
-      - "8081:80"
+      - "8080:80"
       - "443:443"
     volumes:
       - ./:/var/www
@@ -42,7 +42,7 @@ services:
     restart: unless-stopped
     tty: true
     ports:
-      - "3307:3306"
+      - "3306:3306"
     environment:
       MYSQL_DATABASE: maximilhas_db
       MYSQL_ROOT_PASSWORD: root
